@@ -1,7 +1,7 @@
 ---
 name: yuumi:update
-description: Use when the user wants to update, upgrade, or refresh the installed yuumi skills to their latest published versions — pulls only the yuumi pack, leaving every other skill source untouched
-version: 1.6.1
+description: Use when the user wants to update the installed yuumi skills to their latest published versions — pulls only the yuumi pack, leaving every other skill source untouched
+version: 1.6.2
 ---
 
 # Yuumi Update
@@ -17,21 +17,12 @@ The plain `npx skills update` refreshes *every* skill from *every* source you ha
 `npx skills update` accepts an explicit list of skill names. So the move is: ask the CLI which yuumi skills are installed, then hand exactly those names back to `update`.
 
 ```bash
-npx skills list -g --json \
-  | grep -oE '"yuumi:[^"]*"' \
-  | tr -d '"' \
-  | sort -u
-```
-
-That prints the installed yuumi skill names (`yuumi:edit`, `yuumi:pretty`, …). The `yuumi:` colon form only appears in the JSON `name` values — install paths use the hyphen form (`yuumi-edit`), so this match never catches a path by accident.
-
-Then feed them to `update`:
-
-```bash
 names=$(npx skills list -g --json | grep -oE '"yuumi:[^"]*"' | tr -d '"' | sort -u)
 [ -z "$names" ] && { echo "No yuumi skills installed — run: npx skills add -g heeseon87/yuumi"; exit 0; }
 echo "$names" | xargs npx skills update -g -y
 ```
+
+The extraction matches the installed yuumi skill names (`yuumi:edit`, `yuumi:pretty`, …). The `yuumi:` colon form only appears in the JSON `name` values — install paths use the hyphen form (`yuumi-edit`), so this match never catches a path by accident.
 
 **The empty-name guard is not optional.** If extraction returns nothing and you pipe an empty list into `update`, the CLI falls back to updating *everything* — the exact blunt behavior this skill avoids. Always confirm `names` is non-empty before calling `update`.
 

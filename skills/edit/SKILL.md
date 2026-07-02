@@ -1,7 +1,7 @@
 ---
 name: yuumi:edit
-description: Use when editing long drafts or multiple files where copy-paste workflow is tedious, when you have scattered edit instructions across a document, or when edits across files need to stay consistent with each other
-version: 1.6.1
+description: Use when a document carries inline {curly-brace} edit notes to apply in place, or when scattered edits across long drafts or multiple files must stay consistent — no copy-paste round-trips
+version: 1.6.2
 ---
 
 # Edit (Spatial Editing)
@@ -70,21 +70,6 @@ Processed 3 edits in why-vaults-matter.md:
 1. "feels abstract" → added concrete mechanism
 2. "make it hit harder" → expanded with specific pain points
 3. "dont say simple" → replaced with direct statement
-```
-
-## Example Transformation
-
-**Before:**
-
-```markdown
-Vaults give claude memory
-{feels abstract}
-```
-
-**After:**
-
-```markdown
-Vaults give claude persistent memory across sessions by storing context in files it can read and write
 ```
 
 ## Multi-File Consistency
