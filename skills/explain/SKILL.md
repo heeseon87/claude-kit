@@ -1,11 +1,11 @@
 ---
 name: yuumi:explain
-description: Use when a file, endpoint, module, system, or concept needs to be genuinely understood, not skimmed — renders a single-file Anthropic-style HTML explainer that installs a mental model in one read
-version: 1.6.2
+description: Use when a file, endpoint, module, system, concept, or change (a PR, branch, or diff) needs to be genuinely understood, not skimmed — renders a single-file Anthropic-style HTML explainer that installs a mental model in one read; add a comprehension quiz when the user wants their understanding verified ("a quiz I must pass")
+version: 1.6.3
 argument-hint: [target]
 ---
 
-Explain the target — a file, endpoint, module, system, concept — in plain language. Cover the technical architecture, how parts are connected, the technologies used, the *why* behind decisions, and the lessons one can take away (bugs encountered and how they were fixed, pitfalls and how to avoid them, the way good engineers think, best practices).
+Explain the target — a file, endpoint, module, system, concept, or change — in plain language. Cover the technical architecture, how parts are connected, the technologies used, the *why* behind decisions, and the lessons one can take away (bugs encountered and how they were fixed, pitfalls and how to avoid them, the way good engineers think, best practices).
 
 It should be **engaging to read**, not boring documentation. Use analogies and anecdotes where they make abstract things stick. The goal: install an accurate mental model in the reader, not dump information.
 
@@ -65,6 +65,26 @@ Motion is the top rung of the same ladder, not a special case. A relationship yo
 Facts beat symmetry. Do not invent layers, nodes, arrows, files, calls, or domains because a diagram looks empty. Trace the code first; draw only relationships that actually exist. If the visual is about a general concept rather than this codebase, label it as conceptual.
 
 Place each visual where the reader would otherwise pause and re-read. The caption should carry the insight in one sentence.
+
+## When the target is a change (PR, branch, diff)
+
+Investigate the change itself, not just the resulting code: the PR title/body and diff (`gh pr view`/`gh pr diff` or `git log`/`git diff`), linked tickets, and any decision log it references. The reader's question is different from a code explainer's — not "how does this work?" but **"what happened, and why this way?"** Cover:
+
+- **Context** — the problem or ticket that motivated the change; what was wrong with the world before.
+- **Intuition** — the one design idea the change rides on (a path replaced, a responsibility moved, a calculation unified). Before/after is the natural stuck-point visual here.
+- **What was done** — the actual edits, grouped by idea, plus what deliberately *didn't* change (unchanged contracts, preserved semantics — often the most reassuring fact for a reviewer).
+- **What remains** — verification done, and any rollout ordering or follow-ups still open.
+
+Derive the slug from the change's subject (e.g. `sd-1234-me-payment-explained.html`), not from "the diff."
+
+## Comprehension quiz (only when asked)
+
+When the user asks to have their understanding verified — "quiz me", "a quiz I must pass" — append a quiz section at the bottom of the page. Skip it otherwise.
+
+- **Test decisions and mechanisms, not trivia.** Each question should probe something the page's mental model predicts (what happens when X is missing, why Y was computed live). Every wrong option is a **distractor**: a plausible misunderstanding a real reader might hold, not filler.
+- **Grade in-page** with a small inline script: radio options, one grade button, per-question correct/wrong highlighting, and a short explanation revealed after grading that says *why* — a wrong answer should teach.
+- **State the pass bar** explicitly (all-but-one is a good default) and allow retries. With JS off, show a one-line note that grading needs a browser.
+- **Extend the shell, don't fight it** — quiz styles go in your own `<style>` block using the shell's design tokens.
 
 ## What to use from the style assets
 
