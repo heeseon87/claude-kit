@@ -1,7 +1,7 @@
 ---
 name: yuumi:pretty
 description: Use when a deliverable should be a polished single-file HTML page — a report, explainer, design note, comparison, or anything too long or too visual for chat — rendered in the warm editorial Yuumi visual system
-version: 1.6.3
+version: 1.6.4
 argument-hint: [brief]
 ---
 
@@ -70,6 +70,8 @@ Risky insertion points include `<p>`, `<figcaption>`, SVG labels, `href`, `src`,
 
 A figure of speech earns its place the same way a diagram does — by carrying a thought the plain sentence could not. Strip the metaphor: if an insight remains, keep it; if only ornament remains, cut back to the plain statement. The cut is for noise, not substance — where the idea itself is genuinely hard, slow down and expand instead of trimming. The danger is two-sided: a flattened, dry voice is as wrong as prose that reaches for a flourish every sentence. Spend words only where they buy comprehension, and never let the writing describe its own structure — the words should be the understanding, not a description of the act of explaining.
 
+**Enumerations get list markup, not inline markers.** The moment a sentence carries two or more parallel items tagged ①②③, (1)(2), or "첫째/둘째" — conditions, steps, prerequisites, checks — break it into `<ul>`/`<ol>` (or `.steps` when order matters), one item per line. Inline enumeration inside a `<p>` forces the reader to re-parse the sentence to find the item boundaries; the line break is what makes parallel structure scannable. Keep inline numbering only when the items are two or three words each and the sentence would survive reading aloud.
+
 ### Cognitive-load visuals
 
 Visuals are not decoration. Add a diagram only when it saves the reader from doing mental bookkeeping: simulating branches, remembering a timeline, comparing before/after states, mapping input to output, following a data transformation, or stacking verification evidence.
@@ -101,7 +103,7 @@ The page should feel warm, editorial, restrained, and technically precise: paper
 The real test is comprehension. A reader should need less working memory after the page exists:
 
 - the headline insight is visible in the first viewport
-- named facts are grouped instead of buried in prose
+- named facts are grouped instead of buried in prose; no paragraph carries an inline ①②③-style enumeration that should be a list
 - branches, timelines, contracts, and verification stacks are visualized only when prose would make the reader calculate
 - visuals are source-grounded and captioned with the actual insight
 - the browser renders cleanly with no console errors
