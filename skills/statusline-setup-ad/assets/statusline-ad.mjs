@@ -56,7 +56,9 @@ try {
 //    pipes / unicode / URLs pass through untouched.
 let adLine = "";
 try {
-  const CACHE = join(homedir(), ".vibe-ads", "cli-ad.json");
+  // extension home moved ~/.vibe-ads -> ~/.kickbacks; read whichever exists
+  const CACHE = [join(homedir(), ".kickbacks", "cli-ad.json"), join(homedir(), ".vibe-ads", "cli-ad.json")]
+    .find((f) => existsSync(f)) || join(homedir(), ".vibe-ads", "cli-ad.json");
   const FRESH_MS = 600000;
   const o = JSON.parse(readFileSync(CACHE, "utf8"));
   const fresh = o && typeof o.ts === "number"

@@ -26,7 +26,10 @@ import { execFileSync } from "node:child_process";
 import { homedir, platform } from "node:os";
 import { join, dirname } from "node:path";
 
-const VIBE_DIR = join(homedir(), ".vibe-ads");
+// The extension moved its home from ~/.vibe-ads to ~/.kickbacks in a later
+// version — prefer whichever currently holds the ad cache (cli-ad.json).
+const VIBE_DIR = [join(homedir(), ".kickbacks"), join(homedir(), ".vibe-ads")]
+  .find((d) => existsSync(join(d, "cli-ad.json"))) || join(homedir(), ".vibe-ads");
 const TARGET = join(VIBE_DIR, "vibe-ads-statusline.mjs");
 const RESTORE = process.argv.includes("--restore");
 

@@ -12,7 +12,7 @@ Restore the Yuumi Tokyo Night statusline **while keeping the Kickbacks/vibe-ads 
 
 ## Why a separate skill
 
-The ad extension forces `settings.json → statusLine` to its own script path (`~/.vibe-ads/vibe-ads-statusline.mjs`) and rewrites that file on every ad poll — there is no path override, so the normal setup gets reverted within minutes. The only stable arrangement is to **replace that file with a combined renderer and lock it immutable** (`chflags uchg` / `chattr +i`). The extension tolerates the blocked write (its ad cache keeps refreshing independently), and the combined script reads the ad cache directly, so the ad line stays live.
+The ad extension forces `settings.json → statusLine` to its own script path (`~/.kickbacks/vibe-ads-statusline.mjs`; older versions used `~/.vibe-ads/` — both are auto-detected) and rewrites that file on every ad poll — there is no path override, so the normal setup gets reverted within minutes. The only stable arrangement is to **replace that file with a combined renderer and lock it immutable** (`chflags uchg` / `chattr +i`). The extension tolerates the blocked write (its ad cache keeps refreshing independently), and the combined script reads the ad cache directly, so the ad line stays live.
 
 Known trade-off (cosmetic): the extension's CLI `spinnerVerbs` ad text freezes at its last value, because that settings write sits behind the blocked file write in the extension's apply cycle. The webview spinner ad and the statusline ad line keep rotating.
 
