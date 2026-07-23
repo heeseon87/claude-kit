@@ -99,6 +99,11 @@ function getContextPercent(stdin) {
   return 0;
 }
 
+function getEffortLevel(stdin) {
+  // stdin.effort.level: low | medium | high | xhigh | max (세션별 실제 적용값)
+  return stdin.effort?.level ?? null;
+}
+
 
 // ============================================================================
 // Version Check (1시간 캐시)
@@ -292,6 +297,23 @@ const TN = {
   dark:    { fg: fg(26, 27, 38) },                              // #1a1b26
 };
 
+// Effort 단계별 색상/라벨 (낮음 → 높음 순으로 차분한 색에서 강조색으로)
+const EFFORT_STYLE = {
+  low:    TN.lavender,
+  medium: TN.cyan,
+  high:   TN.teal,
+  xhigh:  TN.amber,
+  max:    TN.coral,
+};
+
+const EFFORT_LABEL = {
+  low: 'LOW',
+  medium: 'MED',
+  high: 'HIGH',
+  xhigh: 'XHIGH',
+  max: 'MAX',
+};
+
 // Powerline 세그먼트 연결: 화살표로 배경색이 이어지는 효과
 // '' (U+E0B0) = powerline right arrow
 const PL = '\uE0B0';
@@ -432,6 +454,13 @@ async function main() {
       ? (ctxSize >= 1000000 ? `${Math.floor(ctxSize / 1000000)}M` : `${Math.floor(ctxSize / 1000)}k`)
       : '';
     segments.push({ text: `\uF2DB ${modelName}${ctxLabel ? `(${ctxLabel})` : ''}`, color: TN.blue });
+
+    const effortLevel = getEffortLevel(stdin);
+    if (effortLevel) {
+      const effortLabel = EFFORT_LABEL[effortLevel] ?? effortLevel.toUpperCase();
+      const effortColor = EFFORT_STYLE[effortLevel] ?? TN.lavender;
+      segments.push({ text: effortLabel, color: effortColor });
+    }
 
     const dirName = getDirName(stdin);
     segments.push({ text: `\uF07B ${dirName}`, color: TN.green });          //  folder
