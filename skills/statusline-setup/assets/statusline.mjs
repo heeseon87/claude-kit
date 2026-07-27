@@ -279,11 +279,12 @@ function getSessionStartFromTranscript(transcriptPath) {
 // Fable처럼 모델별 주간 한도(weekly_scoped)는 OAuth usage API에만 있으므로
 // 백그라운드에서 키체인 토큰으로 조회해 캐시하고, 메인 경로는 캐시만 읽는다.
 const USAGE_API_CACHE_PATH = join(homedir(), '.claude', '.statusline-usage-api.json');
-// 주간 게이지라 신선도 요구가 낮다. 이 엔드포인트는 rate limit이 민감해서
-// (실측: 잦은 호출 시 계정 단위 429, 수십 분 지속) 보수적으로 5분 주기.
-const USAGE_API_REFRESH_MS = 5 * 60 * 1000;
+// 이 엔드포인트는 rate limit이 민감하다 (실측: 초당 호출 시 계정 단위 429, 1시간 이상 지속).
+// 아래 두 상수를 1분 밑으로 내리지 마라. 세션이 몇 개든 캐시 파일을 공유하므로
+// 실제 호출은 계정 전체에서 분당 1회로 묶인다.
+const USAGE_API_REFRESH_MS = 60 * 1000;
 // 갱신 '시도' 최소 간격. 실패가 지속돼도 이 간격 밑으로는 재시도하지 않는다.
-const USAGE_API_ATTEMPT_MS = 3 * 60 * 1000;
+const USAGE_API_ATTEMPT_MS = 60 * 1000;
 
 function refreshUsageApiInBackground() {
   const script = `
