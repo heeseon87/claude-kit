@@ -1,7 +1,7 @@
 ---
 name: yuumi:statusline-setup
 description: Install the Tokyo Night statusline in Claude Code (one-time; Claude Code only — sets settings.json statusLine to point at the statusline shipped with this skill)
-version: 1.6.5
+version: 1.6.6
 ---
 
 # Yuumi Statusline Setup
@@ -38,7 +38,17 @@ No re-run needed. `npx skills update` refreshes `statusline.mjs` at its stable s
 ## After setup
 
 The statusline shows:
-- **Line 1** — IME indicator (가/A) · version · model (context) · directory · git branch (powerline segments)
-- **Line 2** — 5h / 7d rate-limit bars · session duration · context bar
+- **Line 1** — IME indicator (가/A) · version · model (context) · effort level · directory · git branch (powerline segments)
+- **Line 2** — 5h / 7d rate-limit bars · per-model weekly limit (see below) · session duration · context bar
 
 Requires a **Nerd Font** terminal and **truecolor (24-bit)** support.
+
+## Per-model weekly limit segment
+
+Some subscription plans have model-scoped weekly limits (e.g. a separate Fable bucket) that Claude Code's `/usage` screen shows but the statusline stdin does not carry. The statusline fetches these itself:
+
+- **Data source**: `https://api.anthropic.com/api/oauth/usage` — the same endpoint the `/usage` command uses. This is an **undocumented endpoint**; if its schema changes, the segment silently disappears (the rest of the statusline is unaffected).
+- **Credential access**: the fetch authenticates with your own Claude Code OAuth token, read from the macOS Keychain (`Claude Code-credentials`) or, on Windows/Linux (and as a macOS fallback), from `~/.claude/.credentials.json`. The token is sent **only** to `api.anthropic.com` and is never written anywhere.
+- **macOS note**: the first fetch may show a Keychain permission dialog for `node`. Choose "Always Allow" once.
+- **Rate limiting**: results are cached in `~/.claude/.statusline-usage-api.json` for 5 minutes, with fetch attempts throttled to one per 3 minutes across all sessions. The endpoint rate-limits aggressively, so do not lower these intervals.
+- Plans without model-scoped limits (or API-key logins) simply never show the segment.

@@ -1,7 +1,7 @@
 ---
 name: yuumi:explain
 description: Use when a file, endpoint, module, system, concept, or change (a PR, branch, or diff) needs to be genuinely understood, not skimmed — renders a single-file Anthropic-style HTML explainer that installs a mental model in one read; add a comprehension quiz when the user wants their understanding verified ("a quiz I must pass")
-version: 1.6.5
+version: 1.6.6
 argument-hint: [target]
 ---
 

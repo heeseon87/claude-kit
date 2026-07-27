@@ -100,7 +100,7 @@ Runs an OS-aware checklist (node availability, the installed statusline asset, e
 Once set up, the HUD renders two lines (powerline segments on a Tokyo Night palette):
 
 - **Line 1** — IME indicator (가/A) · version · model (context size) · directory · git branch
-- **Line 2** — 5h / 7d rate-limit bars · session duration · context bar
+- **Line 2** — 5h / 7d rate-limit bars · per-model weekly limit (plans with model-scoped limits, e.g. Fable) · session duration · context bar
 
 The rate-limit bars are **allocation-aware**: the color isn't a fixed percentage, it's relative to how much time has elapsed in the window — so you can tell at a glance whether you're under- or over-spending your budget.
 

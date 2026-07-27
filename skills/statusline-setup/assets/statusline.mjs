@@ -272,6 +272,137 @@ function getSessionStartFromTranscript(transcriptPath) {
 }
 
 // ============================================================================
+// Usage API (모델별 주간 한도 — /usage 커맨드와 같은 소스, 60초 캐시)
+// ============================================================================
+
+// stdin의 rate_limits에는 five_hour/seven_day 통합 버킷만 온다.
+// Fable처럼 모델별 주간 한도(weekly_scoped)는 OAuth usage API에만 있으므로
+// 백그라운드에서 키체인 토큰으로 조회해 캐시하고, 메인 경로는 캐시만 읽는다.
+const USAGE_API_CACHE_PATH = join(homedir(), '.claude', '.statusline-usage-api.json');
+// 주간 게이지라 신선도 요구가 낮다. 이 엔드포인트는 rate limit이 민감해서
+// (실측: 잦은 호출 시 계정 단위 429, 수십 분 지속) 보수적으로 5분 주기.
+const USAGE_API_REFRESH_MS = 5 * 60 * 1000;
+// 갱신 '시도' 최소 간격. 실패가 지속돼도 이 간격 밑으로는 재시도하지 않는다.
+const USAGE_API_ATTEMPT_MS = 3 * 60 * 1000;
+
+function refreshUsageApiInBackground() {
+  const script = `
+const { execFileSync } = require('node:child_process');
+const https = require('node:https');
+const { writeFileSync, readFileSync } = require('node:fs');
+const { join } = require('node:path');
+const { homedir } = require('node:os');
+const cachePath = ${JSON.stringify(USAGE_API_CACHE_PATH)};
+
+// OAuth 토큰 조회: macOS는 키체인, Windows/Linux는 평문 credentials 파일.
+// macOS도 키체인 실패 시(권한 거부 등) 파일로 폴백.
+function readToken() {
+  if (process.platform === 'darwin') {
+    try {
+      const raw = execFileSync('security',
+        ['find-generic-password', '-s', 'Claude Code-credentials', '-w'],
+        { encoding: 'utf8', timeout: 3000 });
+      return JSON.parse(raw).claudeAiOauth.accessToken;
+    } catch {}
+  }
+  const configDir = process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude');
+  const raw = readFileSync(join(configDir, '.credentials.json'), 'utf8');
+  return JSON.parse(raw).claudeAiOauth.accessToken;
+}
+
+try {
+  const token = readToken();
+  if (!token) process.exit(0);
+  const req = https.get('https://api.anthropic.com/api/oauth/usage', {
+    headers: { Authorization: 'Bearer ' + token, 'anthropic-beta': 'oauth-2025-04-20' },
+    timeout: 5000,
+  }, (res) => {
+    let body = '';
+    res.setEncoding('utf8');
+    res.on('data', c => { body += c; });
+    res.on('end', () => {
+      try {
+        if (res.statusCode !== 200) process.exit(0);
+        const limits = JSON.parse(body).limits;
+        if (!Array.isArray(limits)) process.exit(0);
+        writeFileSync(cachePath, JSON.stringify({ timestamp: Date.now(), lastAttempt: Date.now(), limits }));
+      } catch {}
+    });
+  });
+  req.on('timeout', () => req.destroy());
+  req.on('error', () => {});
+} catch {}
+`;
+
+  try {
+    const child = spawn(process.execPath, ['-e', script], {
+      stdio: 'ignore',
+      detached: true,
+      windowsHide: true,
+    });
+    child.unref();
+  } catch {}
+}
+
+// 모델 범위 주간 한도(weekly_scoped)만 반환. 통합 버킷은 stdin이 이미 제공.
+function getScopedWeeklyLimits() {
+  let cached = null;
+  try {
+    if (existsSync(USAGE_API_CACHE_PATH)) {
+      cached = JSON.parse(readFileSync(USAGE_API_CACHE_PATH, 'utf-8'));
+      if (Date.now() - cached.timestamp < USAGE_API_REFRESH_MS) {
+        return extractScoped(cached);
+      }
+    }
+  } catch {}
+
+  // 시도 스로틀: 마지막 시도 후 30초 안 지났으면 spawn 없이 만료 캐시만 표시
+  const lastAttempt = cached?.lastAttempt || 0;
+  if (Date.now() - lastAttempt >= USAGE_API_ATTEMPT_MS) {
+    try {
+      writeFileSync(USAGE_API_CACHE_PATH, JSON.stringify({
+        timestamp: cached?.timestamp || 0,
+        lastAttempt: Date.now(),
+        limits: cached?.limits || [],
+      }));
+    } catch {}
+    refreshUsageApiInBackground();
+  }
+
+  return cached ? extractScoped(cached) : null; // 만료 캐시라도 즉시 표시
+}
+
+function extractScoped(cached) {
+  const scoped = (cached.limits || []).filter(
+    (l) => l.kind === 'weekly_scoped' && typeof l.percent === 'number'
+  );
+  return scoped.length > 0 ? scoped : null;
+}
+
+// 모델 범위별 아이콘 (Nerd Font). fable(우화) = 책, 그 외 모델은 이름 그대로.
+const SCOPE_ICON = {
+  fable: '📖',  // 📖 open book emoji
+};
+
+// weekly_scoped 항목 → " ██░░ 37%(2d14h)" (색상은 7일 배분 기준)
+function formatScopedWeekly(scopedLimits) {
+  const parts = [];
+  for (const limit of scopedLimits) {
+    const name = (limit.scope?.model?.display_name || limit.kind).toLowerCase();
+    const label = SCOPE_ICON[name] || name;
+    const resetMinutes = limit.resets_at
+      ? Math.max(0, Math.floor((new Date(limit.resets_at).getTime() - Date.now()) / 60000))
+      : 0;
+    const elapsedDays = (168 - Math.max(1, resetMinutes / 60)) / 24;
+    const bar = allocationBar(limit.percent, elapsedDays, 7);
+    parts.push(
+      `${magenta(label)} ${bar} ${colorAllocationPercent(limit.percent, limit.percent, elapsedDays, 7)}(${formatDuration(resetMinutes)})`
+    );
+  }
+  return parts.length > 0 ? parts.join(' ') : null;
+}
+
+// ============================================================================
 // Colors (ANSI Truecolor - Tokyo Night palette)
 // ============================================================================
 
@@ -476,6 +607,13 @@ async function main() {
     const limitsStr = formatRateLimits(stdin.rate_limits);
     if (limitsStr) {
       line2.push(limitsStr);
+    }
+
+    // 모델별 주간 한도 (usage API, 60초 캐시) — Fable 등 weekly_scoped 버킷
+    const scopedLimits = getScopedWeeklyLimits();
+    if (scopedLimits) {
+      const scopedStr = formatScopedWeekly(scopedLimits);
+      if (scopedStr) line2.push(scopedStr);
     }
 
     const sessionStart = getSessionStartFromTranscript(stdin.transcript_path);

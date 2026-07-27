@@ -1,7 +1,7 @@
 ---
 name: yuumi:update
 description: Use when the user wants to update the installed yuumi skills to their latest published versions — pulls only the yuumi pack, leaving every other skill source untouched
-version: 1.6.5
+version: 1.6.6
 ---
 
 # Yuumi Update
