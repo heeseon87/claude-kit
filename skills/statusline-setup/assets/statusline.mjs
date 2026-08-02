@@ -285,6 +285,8 @@ const USAGE_API_CACHE_PATH = join(homedir(), '.claude', '.statusline-usage-api.j
 const USAGE_API_REFRESH_MS = 60 * 1000;
 // 갱신 '시도' 최소 간격. 실패가 지속돼도 이 간격 밑으로는 재시도하지 않는다.
 const USAGE_API_ATTEMPT_MS = 60 * 1000;
+// 캐시를 화면에 띄워둘 최대 나이. 이걸 넘으면 세그먼트를 감춘다.
+const USAGE_API_MAX_STALE_MS = 10 * 60 * 1000;
 
 function refreshUsageApiInBackground() {
   const script = `
@@ -292,23 +294,52 @@ const { execFileSync } = require('node:child_process');
 const https = require('node:https');
 const { writeFileSync, readFileSync } = require('node:fs');
 const { join } = require('node:path');
-const { homedir } = require('node:os');
+const { homedir, userInfo } = require('node:os');
 const cachePath = ${JSON.stringify(USAGE_API_CACHE_PATH)};
 
 // OAuth 토큰 조회: macOS는 키체인, Windows/Linux는 평문 credentials 파일.
 // macOS도 키체인 실패 시(권한 거부 등) 파일로 폴백.
+//
+// 키체인에는 같은 서비스명 'Claude Code-credentials' 항목이 여러 개 쌓인다
+// (계정 라벨이 실제 사용자명인 것, 'unknown'인 것, 해시 접미사가 붙은 옛 항목).
+// -a 없이 조회하면 그중 아무거나 하나가 오는데, 껍데기 항목은 accessToken이
+// 빈 문자열이고 옛 항목은 이미 만료라 401이 난다. 그래서 후보를 여러 개 모은 뒤
+// '토큰이 있고 아직 안 만료된 것 중 가장 늦게 만료되는 것'을 고른다.
+// 계정 라벨을 하드코딩하면 다른 사용자 머신에서 깨지므로 라벨로 특정하지 않는다.
 function readToken() {
-  if (process.platform === 'darwin') {
+  const candidates = [];
+  const collect = (raw) => {
     try {
-      const raw = execFileSync('security',
-        ['find-generic-password', '-s', 'Claude Code-credentials', '-w'],
-        { encoding: 'utf8', timeout: 3000 });
-      return JSON.parse(raw).claudeAiOauth.accessToken;
+      const oauth = JSON.parse(raw).claudeAiOauth;
+      if (oauth && oauth.accessToken) candidates.push(oauth);
     } catch {}
+  };
+
+  if (process.platform === 'darwin') {
+    let user = '';
+    try { user = userInfo().username; } catch {}
+    const argSets = [['find-generic-password', '-s', 'Claude Code-credentials', '-w']];
+    if (user) {
+      argSets.push(['find-generic-password', '-s', 'Claude Code-credentials', '-a', user, '-w']);
+    }
+    for (const args of argSets) {
+      try {
+        collect(execFileSync('security', args, { encoding: 'utf8', timeout: 3000 }));
+      } catch {}
+    }
   }
-  const configDir = process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude');
-  const raw = readFileSync(join(configDir, '.credentials.json'), 'utf8');
-  return JSON.parse(raw).claudeAiOauth.accessToken;
+
+  try {
+    const configDir = process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude');
+    collect(readFileSync(join(configDir, '.credentials.json'), 'utf8'));
+  } catch {}
+
+  const now = Date.now();
+  const unexpired = candidates.filter((o) => !o.expiresAt || o.expiresAt > now);
+  // 전부 만료로 보이면 그래도 가장 최신 것으로 시도한다 (expiresAt이 틀릴 수 있다).
+  const pool = unexpired.length > 0 ? unexpired : candidates;
+  pool.sort((a, b) => (b.expiresAt || 0) - (a.expiresAt || 0));
+  return pool.length > 0 ? pool[0].accessToken : null;
 }
 
 try {
@@ -370,7 +401,12 @@ function getScopedWeeklyLimits() {
     refreshUsageApiInBackground();
   }
 
-  return cached ? extractScoped(cached) : null; // 만료 캐시라도 즉시 표시
+  // 만료 캐시라도 잠깐은 그대로 보여준다 (갱신 실패가 일시적일 수 있다).
+  // 다만 무한정은 안 된다. 토큰이 죽으면 갱신은 조용히 실패만 하는데,
+  // 그때 옛 값을 계속 그리면 화면은 멀쩡해 보이고 숫자만 얼어붙는다.
+  // 상한을 넘기면 세그먼트를 지워서 고장이 눈에 보이게 한다.
+  if (!cached || Date.now() - (cached.timestamp || 0) > USAGE_API_MAX_STALE_MS) return null;
+  return extractScoped(cached);
 }
 
 function extractScoped(cached) {

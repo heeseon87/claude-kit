@@ -1,7 +1,7 @@
 ---
 name: yuumi:statusline-setup
 description: Install the Tokyo Night statusline in Claude Code (one-time; Claude Code only — sets settings.json statusLine to point at the statusline shipped with this skill)
-version: 1.6.7
+version: 1.6.8
 ---
 
 # Yuumi Statusline Setup
@@ -48,7 +48,7 @@ Requires a **Nerd Font** terminal and **truecolor (24-bit)** support.
 Some subscription plans have model-scoped weekly limits (e.g. a separate Fable bucket) that Claude Code's `/usage` screen shows but the statusline stdin does not carry. The statusline fetches these itself:
 
 - **Data source**: `https://api.anthropic.com/api/oauth/usage` — the same endpoint the `/usage` command uses. This is an **undocumented endpoint**; if its schema changes, the segment silently disappears (the rest of the statusline is unaffected).
-- **Credential access**: the fetch authenticates with your own Claude Code OAuth token, read from the macOS Keychain (`Claude Code-credentials`) or, on Windows/Linux (and as a macOS fallback), from `~/.claude/.credentials.json`. The token is sent **only** to `api.anthropic.com` and is never written anywhere.
+- **Credential access**: the fetch authenticates with your own Claude Code OAuth token, read from the macOS Keychain (`Claude Code-credentials`) or, on Windows/Linux (and as a macOS fallback), from `~/.claude/.credentials.json`. Because the Keychain can hold several entries under that one service name, some of them empty or expired, the lookup reads a few candidates and keeps the one that still works. The token is sent **only** to `api.anthropic.com` and is never written anywhere.
 - **macOS note**: the first fetch may show a Keychain permission dialog for `node`. Choose "Always Allow" once.
 - **Rate limiting**: results are cached in `~/.claude/.statusline-usage-api.json` for 1 minute, with fetch attempts throttled to one per minute across all sessions. The endpoint rate-limits aggressively, so do not lower these intervals.
 - Plans without model-scoped limits (or API-key logins) simply never show the segment.
