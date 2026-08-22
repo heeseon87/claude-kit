@@ -272,7 +272,7 @@ function getSessionStartFromTranscript(transcriptPath) {
 }
 
 // ============================================================================
-// Usage API (모델별 주간 한도 — /usage 커맨드와 같은 소스, 60초 캐시)
+// Usage API (모델별 주간 한도 — /usage 커맨드와 같은 소스, 2분 캐시)
 // ============================================================================
 
 // stdin의 rate_limits에는 five_hour/seven_day 통합 버킷만 온다.
@@ -281,10 +281,10 @@ function getSessionStartFromTranscript(transcriptPath) {
 const USAGE_API_CACHE_PATH = join(homedir(), '.claude', '.statusline-usage-api.json');
 // 이 엔드포인트는 rate limit이 민감하다 (실측: 초당 호출 시 계정 단위 429, 1시간 이상 지속).
 // 아래 두 상수를 1분 밑으로 내리지 마라. 세션이 몇 개든 캐시 파일을 공유하므로
-// 실제 호출은 계정 전체에서 분당 1회로 묶인다.
-const USAGE_API_REFRESH_MS = 60 * 1000;
+// 실제 호출은 계정 전체에서 2분당 1회로 묶인다.
+const USAGE_API_REFRESH_MS = 2 * 60 * 1000;
 // 갱신 '시도' 최소 간격. 실패가 지속돼도 이 간격 밑으로는 재시도하지 않는다.
-const USAGE_API_ATTEMPT_MS = 60 * 1000;
+const USAGE_API_ATTEMPT_MS = 2 * 60 * 1000;
 // 캐시를 화면에 띄워둘 최대 나이. 이걸 넘으면 세그먼트를 감춘다.
 const USAGE_API_MAX_STALE_MS = 10 * 60 * 1000;
 
@@ -646,7 +646,7 @@ async function main() {
       line2.push(limitsStr);
     }
 
-    // 모델별 주간 한도 (usage API, 60초 캐시) — Fable 등 weekly_scoped 버킷
+    // 모델별 주간 한도 (usage API, 2분 캐시) — Fable 등 weekly_scoped 버킷
     const scopedLimits = getScopedWeeklyLimits();
     if (scopedLimits) {
       const scopedStr = formatScopedWeekly(scopedLimits);

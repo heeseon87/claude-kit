@@ -1,7 +1,7 @@
 ---
 name: yuumi:statusline-doctor
 description: Diagnose and fix the Claude Code Tokyo Night statusline (broken paths, permissions, settings.json shape, legacy marketplace-era config) — Claude Code only
-version: 1.6.10
+version: 1.6.11
 ---
 
 # Yuumi Statusline Doctor

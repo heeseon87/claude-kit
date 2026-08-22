@@ -1,7 +1,7 @@
 ---
 name: yuumi:explain
 description: Explain a topic like I'm a backend engineer one year in. Use when the user types /yuumi-explain <topic> or asks for an explainer pitched at a junior backend engineer.
-version: 1.6.10
+version: 1.6.11
 argument-hint: [topic]
 ---
 

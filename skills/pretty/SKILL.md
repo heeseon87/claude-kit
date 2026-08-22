@@ -1,7 +1,7 @@
 ---
 name: yuumi:pretty
 description: Use when a deliverable should be a polished single-file HTML page — a report, explainer, design note, comparison, or anything too long or too visual for chat — rendered in the warm editorial Yuumi visual system
-version: 1.6.10
+version: 1.6.11
 argument-hint: [brief]
 ---
 
