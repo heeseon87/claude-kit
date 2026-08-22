@@ -22,7 +22,7 @@ Two things:
 
 | Capability | Claude Code | Other agents |
 |------------|:-----------:|:------------:|
-| `interview` · `edit` · `explain` · `implement` · `pretty` · `teach-me` · `review` | ✅ | ✅ |
+| `interview` · `edit` · `explain` · `explain-fast` · `explain-detail` · `implement` · `pretty` · `teach-me` · `review` | ✅ | ✅ |
 | `update` — refresh just the yuumi pack | ✅ | ✅ |
 | Tokyo Night statusline HUD | ✅ | — |
 | `statusline-setup` · `statusline-setup-ad` · `statusline-doctor` | ✅ | no-op |
@@ -47,7 +47,17 @@ Reads a plan/spec file and **interviews you in depth** with pointed, non-obvious
 - **Use it when** you're revising long drafts or making consistent edits across multiple files and the copy-paste loop is tedious.
 - **Output:** the edited file(s) plus a short summary of every change made.
 
-#### `/yuumi-explain [target]` — an Anthropic-style HTML explainer
+#### `/yuumi-explain [topic]` — explain like I'm a junior backend engineer
+Explains a topic pitched at a backend engineer one year in, as an **HTML artifact with big pictures and few words**.
+- **Use it when** you want a dead-simple explainer of a concept, not a deep-dive document.
+- **Output:** an HTML explainer artifact.
+
+#### `/yuumi-explain-fast [topic]` — the same explainer, right in the chat
+Same pitch as `explain`, but rendered as **big ASCII diagrams and few words in the chat** — no HTML artifact, no browser.
+- **Use it when** you want the picture now, in the terminal.
+- **Output:** the explanation in the conversation itself.
+
+#### `/yuumi-explain-detail [target]` — an Anthropic-style HTML explainer
 Investigates a target (a file, endpoint, module, system, or concept), then renders a **single-file HTML explainer** designed to install an accurate mental model in one read. It traces the real code, explains the *why* behind decisions, and uses sparse line-art diagrams only where prose would make you do mental bookkeeping. Engaging essay, not dry docs.
 - **Use it when** you (or a teammate) need to actually *understand* a piece of the system.
 - **Output:** `<slug>-explained.html` in the working directory, opened in your browser.
@@ -58,7 +68,7 @@ Implements the spec while keeping a **running HTML notes file** that captures ex
 - **Output:** the code, plus `<slug>-implementation-notes.html` (it tells you how many open questions are waiting).
 
 #### `/yuumi-pretty [brief]` — the house visual system for HTML artifacts
-Turns a brief into a polished, **single-file Anthropic-style HTML artifact** — warm paper background, clay accent, editorial serif type, hairline rules, line-art SVG diagrams, restrained dark code blocks. This is the shared visual language that `explain` and `implement` build on, so every artifact feels like the same family.
+Turns a brief into a polished, **single-file Anthropic-style HTML artifact** — warm paper background, clay accent, editorial serif type, hairline rules, line-art SVG diagrams, restrained dark code blocks. This is the shared visual language that `explain-detail` and `implement` build on, so every artifact feels like the same family.
 
 For longer material it goes past a static page: a **sticky table of contents** with scrollspy, **progressive disclosure** (collapsible sections and tabs), optional **interactive widgets** (before/after slider, step-through walkthroughs, filterable tables), and **data charts that lazy-load only when used** (Chart.js for quantitative data, Mermaid for large graphs) — all themed to the same palette, and every interaction degrades gracefully with JavaScript off. It ships component, interaction-pattern, and data-viz catalogs, and is tuned for cognitive-load-focused visual QA (Korean / mixed CJK text is first-class).
 - **Use it when** you want a beautiful, self-contained — and now navigable, explorable — page for a concept, doc, or report.

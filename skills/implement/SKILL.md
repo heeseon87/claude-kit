@@ -1,7 +1,7 @@
 ---
 name: yuumi:implement
 description: Use when implementing a spec whose reviewer will need the decision trail — resolved ambiguities, deviations, tradeoffs, open questions — not just the diff; keeps a running single-file HTML decision log alongside the code
-version: 1.6.8
+version: 1.6.9
 argument-hint: [spec]
 ---
 
@@ -38,7 +38,7 @@ The file is updated *as you work*, not at the end. The user may open it mid-impl
 
 ## Output: Anthropic-style HTML artifact
 
-A single-file `<topic-slug>-implementation-notes.html` file using the shared `yuumi:pretty` visual language — warm parchment background, clay accent, Hahmlet/serif editorial typography, JetBrains Mono for code, generous whitespace. The shell uses pinned PrismJS CDN scripts by default for marketplace scan-safety; inline them only if the user explicitly needs offline/self-contained delivery. The visual identity is centralized in `pretty` so explain, implement, and standalone design artifacts do not drift.
+A single-file `<topic-slug>-implementation-notes.html` file using the shared `yuumi:pretty` visual language — warm parchment background, clay accent, Hahmlet/serif editorial typography, JetBrains Mono for code, generous whitespace. The shell uses pinned PrismJS CDN scripts by default for marketplace scan-safety; inline them only if the user explicitly needs offline/self-contained delivery. The visual identity is centralized in `pretty` so explain-detail, implement, and standalone design artifacts do not drift.
 
 ## File output
 
@@ -52,7 +52,7 @@ Examples:
 
 If the work target is ambiguous at the start, infer the slug after the first investigation pass from the real files/spec being changed, then initialize the notes file. Do not fall back to the generic `implementation-notes.html` name for new work. If an old `implementation-notes.html` already exists, treat it as legacy input: read it if relevant, then migrate or continue in the new context-slugged file.
 
-What's *not* shared with explain is the *content structure*. There's no fixed template for what comes first or what the section headings should be. Design the structure for this specific implementation: how many decisions there are, how clustered they are, whether they group naturally by domain, by file, by phase. **You decide.**
+What's *not* shared with explain-detail is the *content structure*. There's no fixed template for what comes first or what the section headings should be. Design the structure for this specific implementation: how many decisions there are, how clustered they are, whether they group naturally by domain, by file, by phase. **You decide.**
 
 ## How to design the structure (heuristics, not rules)
 
@@ -96,7 +96,7 @@ Read these when you have a specific question, not as a checklist.
 
 ## Voice — a log, not an essay
 
-The `yuumi:explain` skill is essayist: engaging, literary, with analogies and pull quotes. Implement notes should be **terser and more direct**. The reviewer doesn't want to be charmed — they want to know what you did and why. Default to:
+The `yuumi:explain-detail` skill is essayist: engaging, literary, with analogies and pull quotes. Implement notes should be **terser and more direct**. The reviewer doesn't want to be charmed — they want to know what you did and why. Default to:
 
 - Short sentences.
 - Split multi-step reasoning into several short paragraphs when that helps the reader scan; don't compress distinct reasons into one wall of text.
@@ -105,7 +105,7 @@ The `yuumi:explain` skill is essayist: engaging, literary, with analogies and pu
 - Pull quotes (`<blockquote>`) sparingly, only when one sentence really captures the change.
 - Drop caps (`.body-start`) usually skip — they're for essays, not logs.
 
-The visual style comes from `pretty`; the *prose voice* is still terse implementation logging, not explain's essay voice.
+The visual style comes from `pretty`; the *prose voice* is still terse implementation logging, not explain-detail's essay voice.
 
 ## Quality pass
 

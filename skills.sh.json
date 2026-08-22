@@ -9,6 +9,8 @@
         "design",
         "edit",
         "explain",
+        "explain-fast",
+        "explain-detail",
         "implement",
         "pretty",
         "teach-me",
