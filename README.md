@@ -47,9 +47,8 @@ Reads a plan/spec file and **interviews you in depth** with pointed, non-obvious
 - **Use it when** you're revising long drafts or making consistent edits across multiple files and the copy-paste loop is tedious.
 - **Output:** the edited file(s) plus a short summary of every change made.
 
-#### `/yuumi-explain [topic]` — explain like I'm a junior backend engineer
-Explains a topic pitched at a backend engineer one year in, as an **HTML artifact with big pictures and few words**.
-- **Use it when** you want a dead-simple explainer of a concept, not a deep-dive document.
+#### `/yuumi-explain [topic]` — explain like I'm one year into the field
+Explains a topic pitched at a first-year junior in its field, as a **single-file HTML page (via `pretty`) with big pictures and few words**.- **Use it when** you want a dead-simple explainer of a concept, not a deep-dive document.
 - **Output:** an HTML explainer artifact.
 
 #### `/yuumi-explain-fast [topic]` — the same explainer, right in the chat
