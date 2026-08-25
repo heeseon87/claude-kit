@@ -52,7 +52,7 @@ Explains a topic pitched at a first-year junior in its field, as a **single-file
 - **Output:** an HTML explainer artifact.
 
 #### `/yuumi-explain-fast [topic]` — the same explainer, right in the chat
-Same pitch as `explain`, but rendered as **big ASCII diagrams and few words in the chat** — no HTML artifact, no browser.
+Same pitch as `explain`, but rendered as **big ASCII diagrams and few words in the chat**, with the prose set as marginalia beside each line. No HTML artifact, no browser.
 - **Use it when** you want the picture now, in the terminal.
 - **Output:** the explanation in the conversation itself.
 
